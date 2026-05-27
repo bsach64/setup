@@ -29,6 +29,8 @@ vim.pack.add({
 	"https://github.com/rafamadriz/friendly-snippets",
 	"https://github.com/nvim-treesitter/nvim-treesitter",
 	{ src = "https://github.com/saghen/blink.cmp", version = 'v1.10.1' },
+	'https://github.com/nvim-mini/mini.icons',
+	'https://github.com/MeanderingProgrammer/render-markdown.nvim',
 })
 
 -- plugins: setup --
@@ -42,7 +44,13 @@ require("gitsigns").setup({
 	},
 })
 require("mini.pairs").setup({})
-require("telescope").setup({})
+require("telescope").setup({
+	defaults = {
+		file_ignore_patterns = {
+			"%.patch$",
+		},
+	},
+})
 require("lualine").setup({ options = { theme = "auto" } })
 require("oil").setup({
 	keymaps = {
@@ -83,6 +91,9 @@ vim.keymap.set("n", "<leader>e", ":Oil<CR>") -- Oil
 vim.keymap.set("n", "<leader>sf", require("telescope.builtin").find_files)
 vim.keymap.set("n", "<leader>sg", require("telescope.builtin").live_grep)
 vim.keymap.set("n", "<leader>sw", require("telescope.builtin").grep_string) -- search word
+vim.keymap.set("n", "<leader>sm", function()
+	require("telescope.builtin").man_pages({ sections = { "ALL" } })
+end) -- search man pages
 vim.keymap.set("n", "<leader>sr", require("telescope.builtin").lsp_references) -- search references
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "gd", require("telescope.builtin").lsp_definitions)
@@ -102,4 +113,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = languages,
 	callback = function() vim.treesitter.start() end
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "man",
+  callback = function()
+    vim.cmd.wincmd("H") -- far left
+  end,
 })
