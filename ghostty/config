@@ -1,3 +1,6 @@
 font-family = IosevkaTerm Nerd Font
-font-size = 13
+font-size = 14
 background = #000000
+keybind = ctrl+f=toggle_window_decorations
+clipboard-read = allow
+clipboard-write = allow
