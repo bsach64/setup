@@ -1,39 +1,47 @@
 #!/bin/bash
 set -euxo pipefail
 
-echo "update"
+cd $HOME/Code/setup/
+
+echo "updating..."
 sudo apt update -y && sudo apt upgrade -y
-sudo apt install git curl make build-essential fontconfig vim unzip -y
+sudo apt install git curl make build-essential fontconfig vim btop cmake unzip wl-clipboard -y
 
 mkdir -p $HOME/.config/
 mkdir -p $HOME/Code/
 
-echo "zsh"
+echo "installing zsh..."
 sudo apt install zsh zsh-autosuggestions -y
 sudo chsh -s "$(which zsh)" "$(whoami)"
 ln -sf $HOME/Code/setup/.zshrc $HOME/.zshrc
 
 # install neovim
-echo "neovim"
-sudo snap install nvim --classic
+echo "installing neovim.."
+git clone https://github.com/neovim/neovim $HOME/Code/neovim/
+cd $HOME/Code/neovim/
+git checkout stable
+make CMAKE_BUILD_TYPE=RelWithDebInfo
+sudo make install
 ln -sfn $HOME/Code/setup/nvim $HOME/.config
 
-echo "rust"
+cd $HOME/Code/setup/
+
+echo "installing rust.."
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 . "$HOME/.cargo/env"
 rustup component add rust-analyzer
 
-echo "tmux"
+echo "installing tmux.."
 sudo apt install -y tmux fd-find
 cargo install skim
 ln -sf $HOME/Code/setup/.tmux.conf $HOME/.tmux.conf
 
-echo "golang"
+echo "installing golang.."
 sudo snap install go --classic
 export PATH="$PATH:/snap/bin"
 go install golang.org/x/tools/gopls@latest
 
-echo "criu"
+echo "installing dependencies for criu.."
 sudo apt install -y \
 	asciidoctor \
 	bash \
@@ -72,33 +80,38 @@ sudo apt install -y \
 
 git clone https://github.com/checkpoint-restore/criu.git $HOME/Code/criu-main
 
-echo "node js"
+echo "installing node js.."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 \. "$HOME/.nvm/nvm.sh"
 nvm install 24
 
-echo "lsp setup"
+echo "installing lsps..."
 sudo apt install clangd bear -y
 npm install -g pyright
 cargo install --locked tree-sitter-cli
 
-echo "uv"
+echo "installing helium.."
+curl -fsSL https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc | sudo gpg --dearmor -o /usr/share/keyrings/helium.gpg
+echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" | sudo tee /etc/apt/sources.list.d/helium.list
+sudo apt update && sudo apt install helium-bin -y
+
+echo "installing uv.."
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-echo "opencode"
+echo "installing opencode.."
 curl -fsSL https://opencode.ai/install | bash
 
-echo "tv"
+echo "installing television.."
 curl -fsSL https://alexpasmantier.github.io/television/install.sh | bash
 
-echo "vicinae"
+echo "installing vicinae.."
 curl -fsSL https://vicinae.com/install.sh | bash
 
-echo "ghostty"
+echo "installing ghostty.."
 sudo snap install ghostty --classic
 ln -sfn $HOME/Code/setup/ghostty $HOME/.config/
 
-echo "Iosevka"
+echo "installing Iosevka font.."
 mkdir -p /tmp/font-install/
 curl -sL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/IosevkaTerm.zip" -o "/tmp/font-install/IosevkaTerm.zip"
 mkdir -p /tmp/font-install/extracted/
@@ -108,11 +121,8 @@ find "/tmp/font-install/extracted" -name "*.ttf" -exec cp {} "$HOME/.local/share
 fc-cache -fv "$HOME/.local/share/fonts/" > /dev/null 2>&1
 rm -rf /tmp/font-install/
 
-echo "slack"
-sudo snap install slack
-
 # install gh and login
-echo "github"
+echo "installing github cli.."
 
 (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
 	&& sudo mkdir -p -m 755 /etc/apt/keyrings \
