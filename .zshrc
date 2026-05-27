@@ -29,6 +29,7 @@ export PATH=/home/bsach/.opencode/bin:$PATH
 export PATH=/home/bsach/go/bin:$PATH
 export PATH="$HOME/.local/bin:$PATH"
 
+alias vim="nvim"
 export EDITOR=vim
 export TERM=xterm-256color
 
@@ -44,3 +45,11 @@ precmd() {
 	fi
 }
 eval "$(tv init zsh)"
+
+. "$HOME/.local/bin/env"
+\. "$HOME/.nvm/nvm.sh"
+
+# The next line updates PATH for Nebius CLI.
+if [ -f '/home/bsach/.nebius/path.zsh.inc' ]; then source '/home/bsach/.nebius/path.zsh.inc'; fi
+# The next line enables shell command completion for Nebius CLI.
+if [ -f '/home/bsach/.nebius/completion.zsh.inc' ]; then source '/home/bsach/.nebius/completion.zsh.inc'; fi
