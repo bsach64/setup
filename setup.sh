@@ -5,7 +5,7 @@ cd $HOME/Code/setup/
 
 echo "updating..."
 sudo apt update -y && sudo apt upgrade -y
-sudo apt install git curl make build-essential fontconfig vim btop cmake unzip wl-clipboard -y
+sudo apt install git curl make build-essential fontconfig vim btop cmake unzip wl-clipboard cloc -y
 
 mkdir -p $HOME/.config/
 mkdir -p $HOME/Code/

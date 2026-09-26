@@ -13,8 +13,10 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- plugins --
--- old theme
+-- old old theme
 -- "https://github.com/WTFox/jellybeans.nvim",
+-- old theme
+-- "https://github.com/oskarnurm/koda.nvim"
 vim.pack.add({
 	"https://github.com/tpope/vim-sleuth",
 	"https://github.com/lewis6991/gitsigns.nvim",
@@ -23,9 +25,9 @@ vim.pack.add({
 	"https://github.com/nvim-telescope/telescope.nvim",
 	"https://github.com/nvim-lualine/lualine.nvim",
 	"https://github.com/stevearc/oil.nvim",
-	"https://github.com/oskarnurm/koda.nvim",
 	"https://github.com/neovim/nvim-lspconfig",
 	"https://github.com/tpope/vim-fugitive",
+	"https://github.com/WTFox/luna.nvim",
 	"https://github.com/rafamadriz/friendly-snippets",
 	"https://github.com/nvim-treesitter/nvim-treesitter",
 	{ src = "https://github.com/saghen/blink.cmp", version = 'v1.10.1' },
@@ -44,10 +46,21 @@ require("gitsigns").setup({
 	},
 })
 require("mini.pairs").setup({})
+-- search hidden files (e.g. .github) but skip .git
+local vimgrep_arguments = { unpack(require("telescope.config").values.vimgrep_arguments) }
+table.insert(vimgrep_arguments, "--hidden")
+table.insert(vimgrep_arguments, "--glob")
+table.insert(vimgrep_arguments, "!**/.git/*")
 require("telescope").setup({
 	defaults = {
 		file_ignore_patterns = {
 			"%.patch$",
+		},
+		vimgrep_arguments = vimgrep_arguments,
+	},
+	pickers = {
+		find_files = {
+			find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
 		},
 	},
 })
@@ -74,7 +87,7 @@ vim.lsp.enable({"gopls", "rust_analyzer", "clangd", "pyright", "bash-language-se
 local languages = { 'rust', 'c', 'python', 'go', 'lua', 'bash' }
 require("nvim-treesitter").install(languages)
 
-vim.cmd("colorscheme koda-moss")
+vim.cmd("colorscheme luna")
 
 -- keymaps --
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>") -- clear search with Esc

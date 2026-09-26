@@ -31,6 +31,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 alias vim="nvim"
 export EDITOR=vim
+export KUBE_EDITOR=vim
 export TERM=xterm-256color
 
 autoload -Uz vcs_info

@@ -37,6 +37,10 @@
       "rev": "47f91c416daef12db467145e16bed5bbfe00add8",
       "src": "https://github.com/nvim-lualine/lualine.nvim"
     },
+    "luna.nvim": {
+      "rev": "727c19334528e1b8939f518d1ea43c4e62d98f91",
+      "src": "https://github.com/WTFox/luna.nvim"
+    },
     "midnight.nvim": {
       "rev": "fe062a6f2e5bd77cd8a260f61e6e12789eaf4f13",
       "src": "https://github.com/dasupradyumna/midnight.nvim"
