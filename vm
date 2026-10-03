@@ -1,0 +1,97 @@
+#!/bin/bash
+# turns the VM created by setup-vm.sh on and off.
+#
+#   vm on                        # boot and wait for ssh
+#   vm off                       # shut down
+#   vm restart                   # off, then on
+#   ssh devvm                    # get in
+#
+# knobs: VM_NAME VM_CPUS VM_MEM VM_SSH_PORT
+set -euo pipefail
+
+VM_NAME=${VM_NAME:-dev}
+VM_CPUS=${VM_CPUS:-$(($(sysctl -n hw.ncpu) / 2))}
+VM_MEM=${VM_MEM:-16G}
+VM_SSH_PORT=${VM_SSH_PORT:-2222}
+
+VM_DIR=$HOME/vms/$VM_NAME
+
+running() {
+	[ -f $VM_DIR/vm.pid ] && kill -0 "$(cat $VM_DIR/vm.pid)" 2>/dev/null
+}
+
+on() {
+	if [ ! -f $VM_DIR/disk.qcow2 ]; then
+		echo "$VM_NAME not installed, run setup-vm.sh install first" >&2
+		exit 1
+	fi
+
+	if running; then
+		echo "$VM_NAME already running, ssh $VM_NAME"
+		return
+	fi
+
+	QEMU_SHARE=$(brew --prefix qemu)/share/qemu
+
+	echo "booting $VM_NAME.."
+	qemu-system-aarch64 \
+		-name $VM_NAME \
+		-machine virt -accel hvf -cpu host \
+		-smp $VM_CPUS -m $VM_MEM \
+		-drive if=pflash,format=raw,readonly=on,file=$QEMU_SHARE/edk2-aarch64-code.fd \
+		-drive if=pflash,format=raw,file=$VM_DIR/efi-vars.fd \
+		-drive if=virtio,format=qcow2,file=$VM_DIR/disk.qcow2 \
+		-drive if=virtio,format=raw,readonly=on,file=$VM_DIR/seed.iso \
+		-nic user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$VM_SSH_PORT-:22 \
+		-device virtio-rng-pci \
+		-display none \
+		-serial file:$VM_DIR/console.log \
+		-pidfile $VM_DIR/vm.pid \
+		-daemonize
+
+	echo "waiting for ssh (first boot takes a minute, see $VM_DIR/console.log).."
+	for _ in $(seq 120); do
+		ssh -o ConnectTimeout=2 $VM_NAME true 2>/dev/null && break
+		sleep 2
+	done
+	ssh $VM_NAME cloud-init status --wait >/dev/null
+
+	echo "$VM_NAME is up, ssh $VM_NAME"
+}
+
+off() {
+	if ! running; then
+		echo "$VM_NAME not running"
+		return
+	fi
+
+	PID=$(cat $VM_DIR/vm.pid)
+
+	echo "shutting down $VM_NAME.."
+	ssh -o ConnectTimeout=2 $VM_NAME sudo poweroff 2>/dev/null || true
+	for _ in $(seq 30); do
+		kill -0 $PID 2>/dev/null || break
+		sleep 2
+	done
+
+	if kill -0 $PID 2>/dev/null; then
+		echo "$VM_NAME didn't shut down cleanly, killing it.."
+		kill $PID
+	fi
+	rm -f $VM_DIR/vm.pid
+
+	echo "$VM_NAME is off"
+}
+
+case "${1:-}" in
+on) on ;;
+off) off ;;
+restart)
+	off
+	on
+	;;
+*)
+	echo "usage: vm on|off|restart" >&2
+	exit 1
+	;;
+esac

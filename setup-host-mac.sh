@@ -17,6 +17,13 @@ brew install git curl btop cloc cmake ripgrep
 mkdir -p $HOME/.config/
 mkdir -p $HOME/Code/
 
+echo "setting up key repeat.."
+# holding a key repeats it instead of showing the accent picker (needed for hjkl in vim)
+defaults write -g ApplePressAndHoldEnabled -bool false
+# repeat interval and initial delay, in units of 15ms (UI minimums are 2 and 15)
+defaults write -g KeyRepeat -int 2
+defaults write -g InitialKeyRepeat -int 15
+
 echo "setting up zsh..."
 brew install zsh-autosuggestions
 ln -sf $HOME/Code/setup/.zshrc $HOME/.zshrc
