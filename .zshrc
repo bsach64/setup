@@ -21,12 +21,15 @@ SAVEHIST=10000
 setopt APPEND_HISTORY
 setopt SHARE_HISTORY
 
-source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+for f in /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+	/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh; do
+	[ -f $f ] && source $f && break
+done
 ZSH_AUTOSUGGEST_STRATEGY='history'
 
 # opencode
-export PATH=/home/bsach/.opencode/bin:$PATH
-export PATH=/home/bsach/go/bin:$PATH
+export PATH=$HOME/.opencode/bin:$PATH
+export PATH=$HOME/go/bin:$PATH
 export PATH="$HOME/.local/bin:$PATH"
 
 alias vim="nvim"
@@ -45,12 +48,11 @@ precmd() {
 		PROMPT="%F{006}%n%f %F{004}at%f %F{001}%~%f "
 	fi
 }
-eval "$(tv init zsh)"
 
-. "$HOME/.local/bin/env"
-\. "$HOME/.nvm/nvm.sh"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+[ -f "$HOME/.nvm/nvm.sh" ] && \. "$HOME/.nvm/nvm.sh"
 
 # The next line updates PATH for Nebius CLI.
-if [ -f '/home/bsach/.nebius/path.zsh.inc' ]; then source '/home/bsach/.nebius/path.zsh.inc'; fi
+if [ -f "$HOME/.nebius/path.zsh.inc" ]; then source "$HOME/.nebius/path.zsh.inc"; fi
 # The next line enables shell command completion for Nebius CLI.
-if [ -f '/home/bsach/.nebius/completion.zsh.inc' ]; then source '/home/bsach/.nebius/completion.zsh.inc'; fi
+if [ -f "$HOME/.nebius/completion.zsh.inc" ]; then source "$HOME/.nebius/completion.zsh.inc"; fi
